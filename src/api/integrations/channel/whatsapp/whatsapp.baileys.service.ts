@@ -496,6 +496,14 @@ export class BaileysStartupService extends ChannelStartupService {
         profilePictureUrl: this.instance.profilePictureUrl,
         ...this.stateConnection,
       });
+
+      // Automatically set presence to unavailable to prevent notification issues
+      try {
+        await this.setPresence({ presence: 'unavailable' });
+        this.logger.info(`Set presence to unavailable for instance: ${this.instance.name}`);
+      } catch (error) {
+        this.logger.error(`Failed to set presence to unavailable for instance: ${this.instance.name}`, error);
+      }
     }
 
     if (connection === 'connecting') {
