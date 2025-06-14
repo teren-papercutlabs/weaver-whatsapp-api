@@ -502,7 +502,7 @@ export class BaileysStartupService extends ChannelStartupService {
         await this.setPresence({ presence: 'unavailable' });
         this.logger.info(`Set presence to unavailable for instance: ${this.instance.name}`);
       } catch (error) {
-        this.logger.error(`Failed to set presence to unavailable for instance: ${this.instance.name}`, error);
+        this.logger.error(`Failed to set presence to unavailable for instance: ${this.instance.name} - ${error}`);
       }
     }
 
