@@ -145,8 +145,8 @@ async function bootstrap() {
 
   initWA();
 
-  // Set up cron job to set all instances to unavailable every hour
-  cron.schedule('0 * * * *', async () => {
+  // Set up cron job to set all instances to unavailable every 5 minutes
+  cron.schedule('*/5 * * * *', async () => {
     const logger = new Logger('PRESENCE_CRON');
     try {
       logger.info('Setting all instances to unavailable...');
