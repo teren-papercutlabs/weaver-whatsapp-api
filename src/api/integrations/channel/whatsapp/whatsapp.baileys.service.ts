@@ -499,6 +499,7 @@ export class BaileysStartupService extends ChannelStartupService {
 
       // Automatically set presence to unavailable to prevent notification issues
       try {
+        this.logger.warn(`[PRESENCE MONITOR] Connection open - attempting to set unavailable for instance: ${this.instance.name}`);
         await this.setPresence({ presence: 'unavailable' });
         this.logger.info(`Set presence to unavailable for instance: ${this.instance.name}`);
       } catch (error) {
@@ -2120,22 +2121,30 @@ export class BaileysStartupService extends ChannelStartupService {
           while (remainingDelay > 20000) {
             await this.client.presenceSubscribe(sender);
 
-            await this.client.sendPresenceUpdate((options.presence as WAPresence) ?? 'composing', sender);
+            const presenceType = (options.presence as WAPresence) ?? 'composing';
+            this.logger.warn(`[PRESENCE MONITOR] Message typing - setting presence to: ${presenceType} to ${sender} for instance: ${this.instance.name}`);
+            await this.client.sendPresenceUpdate(presenceType, sender);
 
             await delay(20000);
 
-            await this.client.sendPresenceUpdate('paused', sender);
+            this.logger.warn(`[PRESENCE MONITOR] Message typing - setting presence to: paused to ${sender} for instance: ${this.instance.name}`);
+            this.logger.warn(`[PRESENCE MONITOR] SendPresence API - setting presence to: paused to ${sender} for instance: ${this.instance.name}`);
+          await this.client.sendPresenceUpdate('paused', sender);
 
             remainingDelay -= 20000;
           }
           if (remainingDelay > 0) {
             await this.client.presenceSubscribe(sender);
 
-            await this.client.sendPresenceUpdate((options.presence as WAPresence) ?? 'composing', sender);
+            const presenceType = (options.presence as WAPresence) ?? 'composing';
+            this.logger.warn(`[PRESENCE MONITOR] Message typing - setting presence to: ${presenceType} to ${sender} for instance: ${this.instance.name}`);
+            await this.client.sendPresenceUpdate(presenceType, sender);
 
             await delay(remainingDelay);
 
-            await this.client.sendPresenceUpdate('paused', sender);
+            this.logger.warn(`[PRESENCE MONITOR] Message typing - setting presence to: paused to ${sender} for instance: ${this.instance.name}`);
+            this.logger.warn(`[PRESENCE MONITOR] SendPresence API - setting presence to: paused to ${sender} for instance: ${this.instance.name}`);
+          await this.client.sendPresenceUpdate('paused', sender);
           }
         } else {
           await this.client.presenceSubscribe(sender);
@@ -2144,6 +2153,7 @@ export class BaileysStartupService extends ChannelStartupService {
 
           await delay(options.delay);
 
+          this.logger.warn(`[PRESENCE MONITOR] SendPresence API - setting presence to: paused to ${sender} for instance: ${this.instance.name}`);
           await this.client.sendPresenceUpdate('paused', sender);
         }
       }
@@ -2363,10 +2373,13 @@ export class BaileysStartupService extends ChannelStartupService {
         while (remainingDelay > 20000) {
           await this.client.presenceSubscribe(sender);
 
-          await this.client.sendPresenceUpdate((data?.presence as WAPresence) ?? 'composing', sender);
+          const presenceType = (data?.presence as WAPresence) ?? 'composing';
+          this.logger.warn(`[PRESENCE MONITOR] SendPresence API - setting presence to: ${presenceType} to ${sender} for instance: ${this.instance.name}`);
+          await this.client.sendPresenceUpdate(presenceType, sender);
 
           await delay(20000);
 
+          this.logger.warn(`[PRESENCE MONITOR] SendPresence API - setting presence to: paused to ${sender} for instance: ${this.instance.name}`);
           await this.client.sendPresenceUpdate('paused', sender);
 
           remainingDelay -= 20000;
@@ -2374,10 +2387,13 @@ export class BaileysStartupService extends ChannelStartupService {
         if (remainingDelay > 0) {
           await this.client.presenceSubscribe(sender);
 
-          await this.client.sendPresenceUpdate((data?.presence as WAPresence) ?? 'composing', sender);
+          const presenceType = (data?.presence as WAPresence) ?? 'composing';
+          this.logger.warn(`[PRESENCE MONITOR] SendPresence API - setting presence to: ${presenceType} to ${sender} for instance: ${this.instance.name}`);
+          await this.client.sendPresenceUpdate(presenceType, sender);
 
           await delay(remainingDelay);
 
+          this.logger.warn(`[PRESENCE MONITOR] SendPresence API - setting presence to: paused to ${sender} for instance: ${this.instance.name}`);
           await this.client.sendPresenceUpdate('paused', sender);
         }
       } else {
@@ -2400,11 +2416,14 @@ export class BaileysStartupService extends ChannelStartupService {
   // Presence Controller
   public async setPresence(data: SetPresenceDto) {
     try {
+      this.logger.warn(`[PRESENCE MONITOR] Setting presence to: ${data.presence} for instance: ${this.instance.name}`);
+      
       await this.client.sendPresenceUpdate(data.presence);
 
+      this.logger.warn(`[PRESENCE MONITOR] Successfully set presence to: ${data.presence} for instance: ${this.instance.name}`);
       return { presence: data.presence };
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error(`[PRESENCE MONITOR] Failed to set presence to: ${data.presence} for instance: ${this.instance.name} - Error: ${error}`);
       throw new BadRequestException(error.toString());
     }
   }
